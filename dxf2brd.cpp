@@ -22,6 +22,9 @@
 // MAIL: andy@andygoetz.org
 // PROGRAM: dxf2brd
 
+// MANTAINER: Enrique Condes
+// MAIL: enrique@shapeoko.com
+
 // This program converts DXF files to kicad BRD files.  The KICad
 // board designer has very primitive support drawing shapes
 // accurately. You can use this program to create a complex design in
@@ -42,14 +45,14 @@
 //
 // It will produce BRD code as its output. to add this code to an existing BRD file, run the following command:
 //
-// ./dxf2brd some_dxf_file.dxf >> some_brd_file.brd
+// ./dxf2brd some_dxf_file.dxf >> some_brd_file.kicad_pcb
 
 
 // these defines control the kicad output. All units are tenths of mils:
-#define LINE_THICKNESS 150 	// thickness of traces
+#define LINE_THICKNESS 0.15 	// thickness of traces
 #define X_OFFSET 40000 		// x offset of DXF origin in kicad coordinate space
 #define Y_OFFSET 40000		// y offset of DXF origin in kicad coordinate space
-#define LAYER 28		// layer to render output on
+#define LAYER "(layer Edge.Cuts)"		// layer to render output on
 
 
 // This class contains the callbacks from dxflib only 3 important ones
@@ -73,13 +76,14 @@ protected:
 	int xoffset;
 	int yoffset;
 	// layer to draw on in KICAD drawing (28 is board outline)
-	int layer;
+	string layer;
 	// thickness in tenths of mils of drawing in Kicad
-	int thickness;
+	double thickness;
 public:
 	// constructor
+
 	Dxf2BrdFilter(int xoffset =X_OFFSET,  int yoffset =Y_OFFSET,
-				     int layer = LAYER, int thickness = LINE_THICKNESS);
+				     string layer = LAYER, double thickness = LINE_THICKNESS);
 
 };
 
@@ -97,11 +101,16 @@ void Dxf2BrdFilter::addLine(const DL_LineData& d) {
 	convert(d.x1, d.y1, x1, y1);
 	convert(d.x2, d.y2, x2, y2);
 
-	std::cout << "$DRAWSEGMENT" << std::endl;
-	std::cout << "Po 0 " << x1 << " " << y1 << " "
-		  << x2 << " " << y2 << " " << thickness << std::endl;
-	std::cout << "De " << layer << " 0 900 0 0" << std::endl;
-	std::cout << "$endDRAWSEGMENT" << std::endl;
+	//(gr_line (start 156.21 66.04) (end 156.21 57.785) (angle 90) (layer Edge.Cuts) (width 0.15))
+
+	std::cout << "(gr_line (start " << x1 <<" " << y1 <<") (end " << x2 << " " << y2 << ") (angle 90) "
+		<< layer << " (width "<< thickness << "))" << std::endl;
+
+	// std::cout << "$DRAWSEGMENT" << std::endl;
+	// std::cout << "Po 0 " << x1 << " " << y1 << " "
+	// 	  << x2 << " " << y2 << " " << thickness << std::endl;
+	// std::cout << "De " << layer << " 0 900 0 0" << std::endl;
+	// std::cout << "$endDRAWSEGMENT" << std::endl;
 
 }
 // Circles are a bit more complex. Kicad uses two points: one at the
@@ -234,7 +243,7 @@ void Dxf2BrdFilter::addArc(const DL_ArcData& d) {
 
 // constructor
 Dxf2BrdFilter::Dxf2BrdFilter(int xoffset,  int yoffset,
-			     int layer, int thickness) : 
+			     string layer, double thickness) :
 	xoffset(xoffset), yoffset(yoffset), layer(layer), thickness(thickness) {}
 
 void Dxf2BrdFilter::convert(double xin, double yin, int &xout, int &yout)
@@ -272,11 +281,15 @@ void Dxf2BrdFilter::convertangle(double xin, double yin,
 int main(int argc, char ** argv)
 {
 	if (argc < 2)
+	{
+		std::cerr << "Insufficient arguments." << std::endl;
 		return -1;
+	}
 	Dxf2BrdFilter f;
 	DL_Dxf* dxf = new DL_Dxf();
 
-	if (!dxf->in(argv[1], &f)) {
+	if (!dxf->in(argv[1], &f))
+	{
 		std::cerr << "drawing could not be opened.\n";
 	}
 	delete dxf;
