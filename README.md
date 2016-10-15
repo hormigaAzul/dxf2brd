@@ -13,20 +13,22 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+* **MANTAINER**: Enrique Condes
+* **MAIL**: enrique@shapeoko.com
 
 * **AUTHOR**: Andy Goetz
 * **MAIL:** <andy@andygoetz.org>
 * **PROGRAM:** dxf2brd
 
 
-This program converts DXF files to kicad BRD files.  The KICad
+This program converts DXF files to kicad's kicad_pcb files. The KiCad
 board designer has very primitive support drawing shapes
 accurately. You can use this program to create a complex design in
-a real cad program, like qcad, and import it into a kicad BRD file.
+a real cad program, like qcad, and import it into a kicad_pcb file.
 
 ## Compiling
-To use this program, you must have dxflib installed.
-then use the command:
+To use this program, you must have dxflib installed. It can be downloaded and compiled from https://github.com/clothbot/dxflib
+Then use the command:
 
 ```bash
 g++ dxf2brd.cpp -o dxf2brd -ldxflib
@@ -41,8 +43,8 @@ To run the program, execute the following command:
 ./dxf2brd some_dxf_file.dxf
 ```
 
-It will produce BRD code as its output. to add this code to an existing BRD file, run the following command:
+It will produce kicad_pcb code as its output. To add this code to an existing kicad_pcb file, run the following command:
 
 ```bash
-./dxf2brd some_dxf_file.dxf >> some_brd_file.brd
+./dxf2brd some_dxf_file.dxf >> some_brd_file.kicad_pcb
 ```
