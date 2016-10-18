@@ -17,13 +17,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// MANTAINER: Enrique Condes
+// MAIL: enrique@shapeoko.com
 
 // AUTHOR: Andy Goetz
 // MAIL: andy@andygoetz.org
 // PROGRAM: dxf2brd
-
-// MANTAINER: Enrique Condes
-// MAIL: enrique@shapeoko.com
 
 // This program converts DXF files to kicad BRD files.  The KICad
 // board designer has very primitive support drawing shapes
@@ -48,10 +47,10 @@
 // ./dxf2brd some_dxf_file.dxf >> some_brd_file.kicad_pcb
 
 
-// these defines control the kicad output. All units are tenths of mils:
+// these defines control the kicad output. All units are mm:
 #define LINE_THICKNESS 0.15 	// thickness of traces
-#define X_OFFSET 40000 		// x offset of DXF origin in kicad coordinate space
-#define Y_OFFSET 40000		// y offset of DXF origin in kicad coordinate space
+#define X_OFFSET 13 		// x offset of DXF origin in kicad coordinate space
+#define Y_OFFSET 198	// y offset of DXF origin in kicad coordinate space
 #define LAYER "(layer Edge.Cuts)"		// layer to render output on
 
 
@@ -68,16 +67,16 @@ protected:
 	// converts a DXF Coordinate, angle and radius into a KICAD
 	// coordinate that is offset by the radius in the direction of
 	// angle
-	void convertangle(double xin, double yin, double radius, double angle, int &xout, int &yout);
+	void convertangle(double xin, double yin, double radius, double angle, double &xout, double &yout);
 	// converts a DXF coordinate to a KICAD coordinate
-	void convert(double xin, double yin, int &xout, int &yout);
-	// offset (in 10,000ths of an inch) to insert origin of DXF
+	void convert(double xin, double yin, double &xout, double &yout);
+	// offset (in mm) to insert origin of DXF
 	// drawing in KICAD drawing.
 	int xoffset;
 	int yoffset;
 	// layer to draw on in KICAD drawing (28 is board outline)
 	string layer;
-	// thickness in tenths of mils of drawing in Kicad
+	// thickness in mm of drawing in Kicad
 	double thickness;
 public:
 	// constructor
@@ -92,27 +91,18 @@ public:
 // format: pairs of points for the start and end.
 void Dxf2BrdFilter::addLine(const DL_LineData& d) {
 
-
-	int x1 = 0;
-	int x2 = 0;
-	int y1 = 0;
-	int y2 = 0;
+	double x1 = 0;
+	double x2 = 0;
+	double y1 = 0;
+	double y2 = 0;
 
 	convert(d.x1, d.y1, x1, y1);
 	convert(d.x2, d.y2, x2, y2);
 
-	//(gr_line (start 156.21 66.04) (end 156.21 57.785) (angle 90) (layer Edge.Cuts) (width 0.15))
-
 	std::cout << "(gr_line (start " << x1 <<" " << y1 <<") (end " << x2 << " " << y2 << ") (angle 90) "
 		<< layer << " (width "<< thickness << "))" << std::endl;
-
-	// std::cout << "$DRAWSEGMENT" << std::endl;
-	// std::cout << "Po 0 " << x1 << " " << y1 << " "
-	// 	  << x2 << " " << y2 << " " << thickness << std::endl;
-	// std::cout << "De " << layer << " 0 900 0 0" << std::endl;
-	// std::cout << "$endDRAWSEGMENT" << std::endl;
-
 }
+
 // Circles are a bit more complex. Kicad uses two points: one at the
 // center, and one on the circumference to describe a circle, while
 // DXF uses a center and radius.
@@ -124,44 +114,18 @@ void Dxf2BrdFilter::addLine(const DL_LineData& d) {
 // net.
 void Dxf2BrdFilter::addCircle(const DL_CircleData& d) {
 
-	int cx = 0;
-	int cy = 0;
-	int xend, yend;
-	int rad = (int)d.radius * 10;
-	int crad = rad + 150;
+	double cx = 0;
+	double cy = 0;
+	double xend, yend;
+	double rad = d.radius;
+	double crad = rad + 150;
 
 	convert(d.cx, d.cy, cx, cy);
 	yend = cy;
 	xend = cx + rad;
-	std::cout << "$MODULE MountingHole" << std::endl;
-	std::cout << "Po " << cx << " " << cy <<
-		" 0 15 5052AEE8 5052AC20 ~~" << std::endl;
-	std::cout << "Li MountingHole" << std::endl;
-	std::cout << "Cd Simple Mounting Hole" << std::endl;
-	std::cout << "Kw DEV" << std::endl;
-	std::cout << "Sc 5052AC20" << std::endl;
-	std::cout << "AR 1pin" << std::endl;
-	std::cout << "Op 0 0 0" << std::endl;
-	std::cout << "T0 0 -1200 400 400 0 100 N I 21 N \"Mounting Hole\"" << std::endl;
-	std::cout << "T1 0 1100 400 400 0 100 N I 21 N \"P***\"" << std::endl;
 
-	std::cout << "$PAD" << std::endl;
-	std::cout << "Sh \"\" C " << crad << " "
-		  << crad << " 0 0 0" << std::endl;
-	std::cout << "Dr " << rad << " 0 0" << std::endl;
-	std::cout << "At HOLE N 00E0FFFF" << std::endl;
-	std::cout << "Ne 0 \"\"" << std::endl;
-	std::cout << "Po 0 0" << std::endl;
-	std::cout << "$EndPAD" << std::endl;
-	std::cout << "$EndMODULE  MountingHole" << std::endl;
-
-
-	// draw a picture of the hole for alignment purposes
-	std::cout << "$DRAWSEGMENT" << std::endl;
-	std::cout << "Po 3 " << cx << " " << cy << " " << xend << " " << yend <<" 150" << std::endl;
-	std::cout << "De 24 0 900 0 0" << std::endl;
-	std::cout << "$EndDRAWSEGMENT" << std::endl;
-
+	std::cout << "(gr_circle (center " << cx << " " << cy << ") (end " << xend << " "
+ 		<< yend << ") "<< layer << " (width " << thickness << "))" << std::endl;
 
 }
 
@@ -177,15 +141,24 @@ void Dxf2BrdFilter::addCircle(const DL_CircleData& d) {
 // arcs that are located at 90 degree angles.
 void Dxf2BrdFilter::addArc(const DL_ArcData& d) {
 
-	int xstart = 0;
-	int ystart = 0;
-	int xend = 0;
-	int yend = 0;
+	// int xstart = 0;
+	// int ystart = 0;
+	// int xend = 0;
+	// int yend = 0;
 	int a1 = d.angle1;
 	int a2 = d.angle2;
 
-	int ka1;
-	int ka2;
+	double xstart = 0;
+	double ystart = 0;
+	double xend = 0;
+	double yend = 0;
+	// double a1 = d.angle1;
+	// double a2 = d.angle2;
+
+	// int ka1;
+	// int ka2;
+	double ka1;
+	double ka2;
 	if(a1 % 90 != 0 || a1 == 0) {
 		std::cerr << "Arc not at 90 degrees!" << std::endl;
 		return;
@@ -217,27 +190,29 @@ void Dxf2BrdFilter::addArc(const DL_ArcData& d) {
 		return;
 	}
 	convert(d.cx, d.cy, xstart, ystart);
-
+	//(gr_arc (start 120.96 98.31) (end 120.85 99.41) (angle 90) (layer Edge.Cuts) (width 0.15))
 	convertangle(d.cx, d.cy, d.radius, ka1, xend, yend);
-	std::cout << "$DRAWSEGMENT" << std::endl;
-	std::cout << "Po 2 " << xstart << " " << ystart << " "
-		  << xend << " " << yend << " " << thickness << std::endl;
-	std::cout << "De " << layer << " 0 900 0 0" << std::endl;
-	std::cout << "$endDRAWSEGMENT" << std::endl;
+
+	std::cout << "(gr_arc (start " << xstart <<" " << ystart <<") (end " << xend << " " << yend << ") (angle 90) "
+		<< layer << " (width "<< thickness << "))" << std::endl;
+
+	// std::cout << "$DRAWSEGMENT" << std::endl;
+	// std::cout << "Po 2 " << xstart << " " << ystart << " "
+	// 	  << xend << " " << yend << " " << thickness << std::endl;
+	// std::cout << "De " << layer << " 0 900 0 0" << std::endl;
+	// std::cout << "$endDRAWSEGMENT" << std::endl;
 
 	convert(d.cx, d.cy, xstart, ystart);
 
 	convertangle(d.cx, d.cy, d.radius, ka2, xend, yend);
-	std::cout << "$DRAWSEGMENT" << std::endl;
-	std::cout << "Po 2 " << xstart << " " << ystart << " "
-		  << xend << " " << yend << " " << thickness << std::endl;
-	std::cout << "De " << layer << " 0 900 0 0" << std::endl;
-	std::cout << "$endDRAWSEGMENT" << std::endl;
+	std::cout << "(gr_arc (start " << xstart <<" " << ystart <<") (end " << xend << " " << yend << ") (angle 90) "
+		<< layer << " (width "<< thickness << "))" << std::endl;
 
-
-
-
-
+	// std::cout << "$DRAWSEGMENT" << std::endl;
+	// std::cout << "Po 2 " << xstart << " " << ystart << " "
+	// 	  << xend << " " << yend << " " << thickness << std::endl;
+	// std::cout << "De " << layer << " 0 900 0 0" << std::endl;
+	// std::cout << "$endDRAWSEGMENT" << std::endl;
 
 }
 
@@ -246,19 +221,18 @@ Dxf2BrdFilter::Dxf2BrdFilter(int xoffset,  int yoffset,
 			     string layer, double thickness) :
 	xoffset(xoffset), yoffset(yoffset), layer(layer), thickness(thickness) {}
 
-void Dxf2BrdFilter::convert(double xin, double yin, int &xout, int &yout)
+void Dxf2BrdFilter::convert(double xin, double yin, double &xout, double &yout)
 {
-	xout = (int)(xin * 10) + xoffset;
-	yout = yoffset - (int)(yin * 10);
-
-
+	xout = xin + xoffset;
+	yout = yoffset - yin;
 }
 
+
 void Dxf2BrdFilter::convertangle(double xin, double yin,
-				 double radius, double angle, int &xout, int &yout)
+				 double radius, double angle, double &xout, double &yout)
 {
 	convert(xin, yin, xout, yout);
-	int rad = (int)(radius * 10);
+	int rad = (int)(radius);
 	switch((int)angle) {
 	case 360:
 		xout += rad;

@@ -26,8 +26,17 @@ board designer has very primitive support drawing shapes
 accurately. You can use this program to create a complex design in
 a real cad program, like qcad, and import it into a kicad_pcb file.
 
+## Current status
+
+The program has been updated to generate code compliant with the Pcbnew
+“S-expression” file format which is implemented on the new version of KiCad.
+
+It now generates code for circles and lines but the code for arcs is still
+**NOT WORKING** as of 10/18/16.
+
 ## Compiling
-To use this program, you must have dxflib installed. It can be downloaded and compiled from https://github.com/clothbot/dxflib
+To use this program, you must have dxflib installed. It can be downloaded and
+compiled from https://github.com/clothbot/dxflib
 Then use the command:
 
 ```bash
@@ -48,3 +57,6 @@ It will produce kicad_pcb code as its output. To add this code to an existing ki
 ```bash
 ./dxf2brd some_dxf_file.dxf >> some_brd_file.kicad_pcb
 ```
+## DXF input file format
+
+The input file must be in in millimeters and all closed polygons **MUST** be exploded to lines.
