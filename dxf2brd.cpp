@@ -1,7 +1,7 @@
 #include <dxflib/dl_dxf.h>
 #include <dxflib/dl_creationadapter.h>
 #include <iostream>
-
+#include <math.h>
 
 
 // This program is free software: you can redistribute it and/or modify
@@ -52,6 +52,8 @@
 #define X_OFFSET 13 		// x offset of DXF origin in kicad coordinate space
 #define Y_OFFSET 198	// y offset of DXF origin in kicad coordinate space
 #define LAYER "(layer Edge.Cuts)"		// layer to render output on
+
+#define PI 3.14159265
 
 
 // This class contains the callbacks from dxflib only 3 important ones
@@ -141,79 +143,30 @@ void Dxf2BrdFilter::addCircle(const DL_CircleData& d) {
 // arcs that are located at 90 degree angles.
 void Dxf2BrdFilter::addArc(const DL_ArcData& d) {
 
-	// int xstart = 0;
-	// int ystart = 0;
-	// int xend = 0;
-	// int yend = 0;
-	int a1 = d.angle1;
-	int a2 = d.angle2;
+	double ka1 = d.angle1;
+	double ka2 = d.angle2;
 
 	double xstart = 0;
 	double ystart = 0;
 	double xend = 0;
 	double yend = 0;
-	// double a1 = d.angle1;
-	// double a2 = d.angle2;
 
-	// int ka1;
-	// int ka2;
-	double ka1;
-	double ka2;
-	if(a1 % 90 != 0 || a1 == 0) {
-		std::cerr << "Arc not at 90 degrees!" << std::endl;
-		return;
-	}
-	if(a1 - a2 != 180 && a1 - a2 != -180) {
+	if(fabs(ka1 - ka2) != 180) {
 		std::cerr << "Arc not 180 degrees long!" << std::endl;
 		return;
 	}
-
-
-	// in order to draw the semicircles, we split the single DXF
-	// arc into two 90 degree kicad arcs. In order to draw this
-	// correctly, we need to calculate the end points for these
-	// arcs.
-	if (a1 == 90 && a2 == 270) {
-		ka1 = 180;
-		ka2 = 270;
-	} else if (a1 == 270 && a2 == 90) {
-		ka1 = 360;
-		ka2 = 90;
-	} else if (a1 == 360 && a2 == 180) {
-		ka1 = 90;
-		ka2 = 180;
-	} else if (a1 == 180 && a2 == 360) {
-		ka1 = 270;
-		ka2 = 360;
-	} else {
-		std::cerr << "weird angles: " << a1 << " " << a2 << std::endl;
-		return;
+	double angle = ka2 - ka1;
+	convert(d.cx, d.cy, xstart, ystart);
+	if(angle<0)
+	{
+		convertangle(d.cx, d.cy, d.radius, ka1, xend, yend);
 	}
-	convert(d.cx, d.cy, xstart, ystart);
-	//(gr_arc (start 120.96 98.31) (end 120.85 99.41) (angle 90) (layer Edge.Cuts) (width 0.15))
-	convertangle(d.cx, d.cy, d.radius, ka1, xend, yend);
-
-	std::cout << "(gr_arc (start " << xstart <<" " << ystart <<") (end " << xend << " " << yend << ") (angle 90) "
-		<< layer << " (width "<< thickness << "))" << std::endl;
-
-	// std::cout << "$DRAWSEGMENT" << std::endl;
-	// std::cout << "Po 2 " << xstart << " " << ystart << " "
-	// 	  << xend << " " << yend << " " << thickness << std::endl;
-	// std::cout << "De " << layer << " 0 900 0 0" << std::endl;
-	// std::cout << "$endDRAWSEGMENT" << std::endl;
-
-	convert(d.cx, d.cy, xstart, ystart);
-
-	convertangle(d.cx, d.cy, d.radius, ka2, xend, yend);
-	std::cout << "(gr_arc (start " << xstart <<" " << ystart <<") (end " << xend << " " << yend << ") (angle 90) "
-		<< layer << " (width "<< thickness << "))" << std::endl;
-
-	// std::cout << "$DRAWSEGMENT" << std::endl;
-	// std::cout << "Po 2 " << xstart << " " << ystart << " "
-	// 	  << xend << " " << yend << " " << thickness << std::endl;
-	// std::cout << "De " << layer << " 0 900 0 0" << std::endl;
-	// std::cout << "$endDRAWSEGMENT" << std::endl;
-
+	else
+	{
+		convertangle(d.cx, d.cy, d.radius, ka2, xend, yend);
+	}
+	std::cout << "(gr_arc (start " << xstart <<" " << ystart <<") (end " << xend << " " << yend << ") (angle "
+	<< angle << ") " << layer << " (width "<< thickness << "))" << std::endl;
 }
 
 // constructor
@@ -231,25 +184,17 @@ void Dxf2BrdFilter::convert(double xin, double yin, double &xout, double &yout)
 void Dxf2BrdFilter::convertangle(double xin, double yin,
 				 double radius, double angle, double &xout, double &yout)
 {
+	// std::cout << "angulo" << angle << std::endl;
 	convert(xin, yin, xout, yout);
-	int rad = (int)(radius);
-	switch((int)angle) {
-	case 360:
-		xout += rad;
-		break;
-	case 90:
-		yout -= rad;
-		break;
-	case 180:
-		xout -= rad;
-		break;
-	case 270:
-		yout += rad;
-		break;
-	default:
-		std::cerr << "invalid angle: " << angle << std::endl;
-	}
+	double rad = radius;
 
+	/*
+	x = r cos(theta)
+	y = r sin(theta)
+	*/
+	xout += rad * (cos(angle * PI / 180.0));
+	// Y must be inverted to work with KiCad's drawing logic
+	yout -= rad * (sin(angle * PI / 180.0));
 }
 
 int main(int argc, char ** argv)

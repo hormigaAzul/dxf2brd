@@ -28,15 +28,12 @@ a real cad program, like qcad, and import it into a kicad_pcb file.
 
 ## Current status
 
-The program has been updated to generate code compliant with the Pcbnew
-“S-expression” file format which is implemented on the new version of KiCad.
+The program has been updated to generate code compliant with the Pcbnew “S-expression” file format which is implemented on the new version of KiCad.
 
-It now generates code for circles and lines but the code for arcs is still
-**NOT WORKING** as of 10/18/16.
+It now generates code for circles, lines, and 180° arcs on any orientation, but the code for arcs is still **under development** as of 10/19/16.
 
 ## Compiling
-To use this program, you must have dxflib installed. It can be downloaded and
-compiled from https://github.com/clothbot/dxflib
+To use this program, you must have dxflib installed. It can be downloaded and compiled from https://github.com/clothbot/dxflib
 Then use the command:
 
 ```bash
