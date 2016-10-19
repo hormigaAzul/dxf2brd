@@ -13,8 +13,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-* **MANTAINER**: Enrique Condes
-* **MAIL**: enrique@shapeoko.com
+* **MANTAINER**: Enrique Condés
+* **MAIL**: <enrique@shapeoko.com>
 
 * **AUTHOR**: Andy Goetz
 * **MAIL:** <andy@andygoetz.org>
@@ -28,9 +28,7 @@ a real cad program, like qcad, and import it into a kicad_pcb file.
 
 ## Current status
 
-The program has been updated to generate code compliant with the Pcbnew “S-expression” file format which is implemented on the new version of KiCad.
-
-It now generates code for circles, lines, and 180° arcs on any orientation, but the code for arcs is still **under development** as of 10/19/16.
+The program has been updated to generate code compliant with the Pcbnew “S-expression” file format which is implemented on the new version of KiCad. As of 10/19/16, all functions have been updated to the new standard and the function to generate arcs now supports any arc length on any orientation.
 
 ## Compiling
 To use this program, you must have dxflib installed. It can be downloaded and compiled from https://github.com/clothbot/dxflib
@@ -54,6 +52,14 @@ It will produce kicad_pcb code as its output. To add this code to an existing ki
 ```bash
 ./dxf2brd some_dxf_file.dxf >> some_brd_file.kicad_pcb
 ```
+
+After that, some editing is needed.
+
+1. Open some_brd_file.kicad_pcb on any text editor.
+2. Add a ')' at the last line.
+3. Remove the ')' that is before the generated code.
+4. Save the file.
+
 ## DXF input file format
 
 The input file must be in in millimeters and all closed polygons **MUST** be exploded to lines.

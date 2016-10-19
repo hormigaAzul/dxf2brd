@@ -45,6 +45,9 @@
 // It will produce BRD code as its output. to add this code to an existing BRD file, run the following command:
 //
 // ./dxf2brd some_dxf_file.dxf >> some_brd_file.kicad_pcb
+//
+// After that some editing is needed. Open some_brd_file.kicad_pcb on any text editor, add a ')' 
+// at the very end and remove the ')' that is before the generated code.
 
 
 // these defines control the kicad output. All units are mm:
@@ -109,11 +112,6 @@ void Dxf2BrdFilter::addLine(const DL_LineData& d) {
 // center, and one on the circumference to describe a circle, while
 // DXF uses a center and radius.
 
-// not only that, but we need to generate drill holes in the PCB
-// instead of just drawing circles on the PCB in order to do this, we
-// add a module with a single pin, that is specified as being
-// mechanical: that is, it is not plated, and not connected to any
-// net.
 void Dxf2BrdFilter::addCircle(const DL_CircleData& d) {
 
 	double cx = 0;
@@ -131,16 +129,11 @@ void Dxf2BrdFilter::addCircle(const DL_CircleData& d) {
 
 }
 
-// This is the most complex conversion. Kicad only allows arcs of 90
-// degrees, which immediately eliminates many possible DXF
-// arcs. Additionally, the format for the arcs is extremely weird:
 // Kicad uses two points to describe an arc: the first point is
 // located at the center of the arc. The second point is located at
 // one terminus of the arc. The other terminus is automatically
-// defined by moving -90 degrees from the start point.
+// defined by moving -N degrees from the start point.
 
-// in addition, to simplify the logic: this routine only supports 180
-// arcs that are located at 90 degree angles.
 void Dxf2BrdFilter::addArc(const DL_ArcData& d) {
 
 	double ka1 = d.angle1;
@@ -152,8 +145,14 @@ void Dxf2BrdFilter::addArc(const DL_ArcData& d) {
 	double yend = 0;
 
 	if(fabs(ka1 - ka2) != 180) {
-		std::cerr << "Arc not 180 degrees long!" << std::endl;
-		return;
+		if(ka1 == 0)
+		{
+			ka1 = 360;
+		}
+		if(ka1 > ka2 || ka2 == 0)
+		{
+			ka2 += 360;
+		}
 	}
 	double angle = ka2 - ka1;
 	convert(d.cx, d.cy, xstart, ystart);
@@ -184,7 +183,6 @@ void Dxf2BrdFilter::convert(double xin, double yin, double &xout, double &yout)
 void Dxf2BrdFilter::convertangle(double xin, double yin,
 				 double radius, double angle, double &xout, double &yout)
 {
-	// std::cout << "angulo" << angle << std::endl;
 	convert(xin, yin, xout, yout);
 	double rad = radius;
 
