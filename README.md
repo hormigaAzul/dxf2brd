@@ -30,7 +30,7 @@ a real cad program, like qcad, and import it into a kicad_pcb file.
 
 The program has been updated to generate code compliant with the Pcbnew “S-expression” file format which is implemented on the new version of KiCad. As of 10/19/16, all functions have been updated to the new standard and the function to generate arcs now supports any arc length on any orientation.
 
-## Compiling
+## Compiling for Linux
 To use this program, you must have dxflib installed. It can be downloaded and compiled from https://github.com/clothbot/dxflib
 Then use the command:
 
@@ -39,6 +39,48 @@ g++ dxf2brd.cpp -o dxf2brd -ldxflib
 ```
 
 To compile the program.
+
+## Compiling for Windows
+To compile and use in Windows, you must download and install MSYS2 (http://sourceforge.net/projects/msys2/).
+Download MSYS2 and install it somewhere, then run "MinGW-w64 Win32 Shell" (if you want a i686 binary) or "MinGW-w64 Win64 Shell" (if you want a x86_64 binary). The following commands are for the i686 binary, if you want the x86_64 binary replace all the "/mingw32" with "/mingw64" and all the mingw-w64-i686-* packages with mingw-w64-x86_64-*
+
+    $ pacman -Sy
+    $ pacman --needed -S bash pacman pacman-mirrors msys2-runtime
+    $ pacman -Su
+
+Close and reopen the shell
+
+    $ pacman -Su
+    $ pacman --needed -S base-devel git mingw-w64-i686-gcc
+
+That leaves it MSYS2 ready for compilation. The following commands do the compiling.
+
+    $ git clone https://github.com/clothbot/dxflib.git
+    $ cd dxflib
+    $ mv src dxflib
+    $ cd dxflib
+    $ g++ -c dl_dxf.cpp -o dl_dxf.o
+    $ g++ -c dl_writer_ascii.cpp -o dl_writer_ascii.o
+    $ cd ../..
+    $ git clone https://github.com/hormigaAzul/dxf2brd.git
+    $ cd dxf2brd
+    $ g++ dxf2brd.cpp ../dxflib/dxflib/dl_dxf.o ../dxflib/dxflib/dl_writer_ascii.o -o dxf2brd.exe -I ../dxflib/
+
+Depending on the compilation you did, i686 binary or x86_64 binary, you will need to copy certain files to the dxf2brd folder.
+
+### For i686 binary
+
+    $ cp /mingw32/bin/libgcc_s_dw2-1.dll .
+    $ cp /mingw32/bin/libstdc++-6.dll .
+    $ cp /mingw32/bin/libwinpthread-1.dll .
+
+### For x86_64 binary
+
+    $ cp /mingw64/bin/libgcc_s_seh-1.dll .
+    $ cp /mingw64/bin/libstdc++-6.dll .
+    $ cp /mingw64/bin/libwinpthread-1.dll .
+
+That leaves a perfectly functional binary for Windows.
 
 ## Running the program
 To run the program, execute the following command:
