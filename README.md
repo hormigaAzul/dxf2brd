@@ -89,11 +89,13 @@ To run the program, execute the following command:
 ./dxf2brd some_dxf_file.dxf
 ```
 
-It will produce kicad_pcb code as its output. To add this code to an existing kicad_pcb file, run the following command:
+It will produce kicad_pcb code as its output that should be manually added to the kicad_pcb file. To automatically add the generated code to an existing kicad_pcb file, run the following command:
 
 ```bash
 ./dxf2brd some_dxf_file.dxf >> some_brd_file.kicad_pcb
 ```
+
+## Fixing the results
 
 After that, some editing is needed.
 
@@ -101,6 +103,21 @@ After that, some editing is needed.
 2. Add a ')' at the last line.
 3. Remove the ')' that is before the generated code.
 4. Save the file.
+
+## Fixer script
+
+A python script is now included to automatically perform the corrections described in the previous step or run the whole generation process and output a fixed file. To perform a file fix, the script should be run like this:
+
+```bash
+python fixer.py --fix board_file.kicad_pcb
+```
+
+To run the whole generation process, it should be run with the following arguments:
+
+
+```bash
+python fixer.py --input board_file.kicad_pcb --dxf some_dxf_file.dxf
+```
 
 ## DXF input file format
 
