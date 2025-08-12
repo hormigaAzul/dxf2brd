@@ -35,7 +35,7 @@ To use this program, you must have dxflib installed. It can be downloaded and co
 Then use the command:
 
 ```bash
-g++ dxf2brd.cpp -o dxf2brd -ldxflib
+make
 ```
 
 To compile the program.
