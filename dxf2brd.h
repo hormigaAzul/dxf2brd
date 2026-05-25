@@ -1,0 +1,51 @@
+#include <dxflib/dl_creationadapter.h>
+#include <dxflib/dl_dxf.h>
+
+#include <cmath>
+#include <iostream>
+
+#ifndef DXF2BRD_H
+#define DXF2BRD_H
+
+// these defines control the kicad output. All units are mm:
+#define LINE_THICKNESS 0.15  // thickness of traces
+#define X_OFFSET 13          // x offset of DXF origin in kicad coordinate space
+#define Y_OFFSET 198         // y offset of DXF origin in kicad coordinate space
+#define LAYER "(layer Edge.Cuts)"  // layer to render output on
+
+#define PI 3.14159265
+
+// This class contains the callbacks from dxflib only 3 important ones
+// matter: the callbacks for lines, circles, and arcs.
+class Dxf2BrdFilter : public DL_CreationAdapter {
+    // called when a line has been detected
+    virtual void addLine(const DL_LineData &d);
+    // called when a circle has been detected
+    virtual void addCircle(const DL_CircleData &d);
+    // called when an arc has been detected
+    virtual void addArc(const DL_ArcData &d);
+
+   protected:
+    // converts a DXF Coordinate, angle and radius into a KICAD
+    // coordinate that is offset by the radius in the direction of
+    // angle
+    void convertangle(double xin, double yin, double radius, double angle,
+                      double &xout, double &yout);
+    // converts a DXF coordinate to a KICAD coordinate
+    void convert(double xin, double yin, double &xout, double &yout);
+    // offset (in mm) to insert origin of DXF
+    // drawing in KICAD drawing.
+    int xoffset;
+    int yoffset;
+    // layer to draw on in KICAD drawing
+    std::string layer;
+    // thickness in mm of drawing in Kicad
+    double thickness;
+
+   public:
+    // constructor
+    Dxf2BrdFilter(int xoffset = X_OFFSET, int yoffset = Y_OFFSET,
+                  std::string layer = LAYER, double thickness = LINE_THICKNESS);
+};
+
+#endif

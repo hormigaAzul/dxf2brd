@@ -13,7 +13,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-* **MANTAINER**: Enrique Condés
+* **MAINTAINER**: Enrique Condés
 * **MAIL**: <enrique@shapeoko.com>
 
 * **AUTHOR**: Andy Goetz
@@ -31,7 +31,7 @@ a real cad program, like qcad, and import it into a kicad_pcb file.
 The program has been updated to generate code compliant with the Pcbnew “S-expression” file format which is implemented on the new version of KiCad. As of 10/19/16, all functions have been updated to the new standard and the function to generate arcs now supports any arc length on any orientation.
 
 ## Compiling for Linux
-To use this program, you must have dxflib installed. It can be downloaded and compiled from https://github.com/clothbot/dxflib
+To use this program, you must have dxflib installed. It can be installed using most distros package manager. Alternatively, it can be downloaded and compiled from https://github.com/clothbot/dxflib
 Then use the command:
 
 ```bash
@@ -42,7 +42,7 @@ To compile the program.
 
 ## Compiling for Windows
 To compile and use in Windows, you must download and install MSYS2 (http://sourceforge.net/projects/msys2/).
-Download MSYS2 and install it somewhere, then run "MinGW-w64 Win32 Shell" (if you want a i686 binary) or "MinGW-w64 Win64 Shell" (if you want a x86_64 binary). The following commands are for the i686 binary, if you want the x86_64 binary replace all the "/mingw32" with "/mingw64" and all the mingw-w64-i686-* packages with mingw-w64-x86_64-*
+Download MSYS2 and install it somewhere, then run "MinGW-w64 Win32 Shell" (if you want a 32-bit binary) or "MinGW-w64 Win64 Shell" (if you want a 64-bit binary). The following commands are for the 64-bit binary, if you want the 32-bit binary replace all the "/mingw64" with "/mingw32" and all the mingw-w64-x86_64-* packages with mingw-w64-i686-*
 
     $ pacman -Sy
     $ pacman --needed -S bash pacman pacman-mirrors msys2-runtime
@@ -51,7 +51,7 @@ Download MSYS2 and install it somewhere, then run "MinGW-w64 Win32 Shell" (if yo
 Close and reopen the shell
 
     $ pacman -Su
-    $ pacman --needed -S base-devel git mingw-w64-i686-gcc
+    $ pacman --needed -S base-devel git mingw-w64-x86_64-gcc
 
 That leaves it MSYS2 ready for compilation. The following commands do the compiling.
 
@@ -66,19 +66,19 @@ That leaves it MSYS2 ready for compilation. The following commands do the compil
     $ cd dxf2brd
     $ g++ dxf2brd.cpp ../dxflib/dxflib/dl_dxf.o ../dxflib/dxflib/dl_writer_ascii.o -o dxf2brd.exe -I ../dxflib/
 
-Depending on the compilation you did, i686 binary or x86_64 binary, you will need to copy certain files to the dxf2brd folder.
+Depending on the compilation you did, 32-bits or 64-bit binary, you will need to copy certain files to the dxf2brd folder.
 
-### For i686 binary
-
-    $ cp /mingw32/bin/libgcc_s_dw2-1.dll .
-    $ cp /mingw32/bin/libstdc++-6.dll .
-    $ cp /mingw32/bin/libwinpthread-1.dll .
-
-### For x86_64 binary
+### For 64-bit binary
 
     $ cp /mingw64/bin/libgcc_s_seh-1.dll .
     $ cp /mingw64/bin/libstdc++-6.dll .
     $ cp /mingw64/bin/libwinpthread-1.dll .
+
+### For 32-bit binary
+
+    $ cp /mingw32/bin/libgcc_s_dw2-1.dll .
+    $ cp /mingw32/bin/libstdc++-6.dll .
+    $ cp /mingw32/bin/libwinpthread-1.dll .
 
 That leaves a perfectly functional binary for Windows.
 

@@ -1,11 +1,16 @@
 import argparse
 import subprocess as sub
 
-parser = argparse.ArgumentParser(description="Integrate dxf2brd generated code into a Kicad board file")
-parser.add_argument('-f', '--fix', dest='fileFix', action='store', help='Kicad file that should be fixed')
-parser.add_argument('-i', '--input', dest='fileIn', action='store', help='Kicad file where the edge should be inserted')
-parser.add_argument('-d', '--dxf', dest='fileDxf', action='store', help='Board edge DXF file')
+parser = argparse.ArgumentParser(
+    description="Integrate dxf2brd generated code into a Kicad board file")
+parser.add_argument('-f', '--fix', dest='fileFix',
+                    action='store', help='Kicad file that should be fixed')
+parser.add_argument('-i', '--input', dest='fileIn', action='store',
+                    help='Kicad file where the edge should be inserted')
+parser.add_argument('-d', '--dxf', dest='fileDxf',
+                    action='store', help='Board edge DXF file')
 args = parser.parse_args()
+
 
 def analyze(line):
     count = 0
@@ -16,16 +21,17 @@ def analyze(line):
             count = count - 1
     return count
 
+
 def fix(arch):
     f = open(arch)
-    lineas = f.readlines();
+    lines = f.readlines()
     f.close()
 
     f = open(arch, 'w')
     unclosed = 0
-    for l in lineas:
+    for l in lines:
         ans = analyze(l)
-        if(ans == 0):
+        if (ans == 0):
             f.write(l)
         else:
             unclosed = unclosed + ans
@@ -34,13 +40,15 @@ def fix(arch):
     f.write(')\n\n')
     f.close()
 
+
 def generate(inFile, dxf):
-    sub.check_call(["./dxf2brd " + dxf + " >> " + inFile], shell = True)
+    sub.check_call(["./dxf2brd " + dxf + " >> " + inFile], shell=True)
     fix(inFile)
 
-if(args.fileFix!=None):
+
+if args.fileFix is not None:
     fix(args.fileFix)
-elif(args.fileIn!=None and args.fileDxf!=None):
+elif (args.fileIn is not None and args.fileDxf is not None):
     generate(args.fileIn, args.fileDxf)
 else:
-    sub.call(["python fixer.py -h"], shell = True)
+    sub.call(["python fixer.py -h"], shell=True)
