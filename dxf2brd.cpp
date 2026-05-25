@@ -47,13 +47,13 @@
 // editor, add a ')' at the very end and remove the ')' that is before the
 // generated code.
 void Dxf2BrdFilter::addPolyline(const DL_PolylineData& d) {
-    unsigned int vertices = d.number;
     // if (currentPolyline.isOpen()) {
     //    currentPolyline.close();
     // }
     // New instances are closed by default, so no need to close it before.
-    currentPolyline = Polyline(vertices);
+    currentPolyline = Polyline(d.number, d.flags);
 }
+
 void Dxf2BrdFilter::addVertex(const DL_VertexData& d) {
     double x = 0;
     double y = 0;
@@ -68,7 +68,7 @@ void Dxf2BrdFilter::addVertex(const DL_VertexData& d) {
     }
 
     // Check if this is the last vertex and the trace should be closed
-    if (currentPolyline.addPoint(x, y)) {
+    if (currentPolyline.addPoint(x, y) && currentPolyline.isClosedGeometry()) {
         p2 = currentPolyline.getInitialVertex();
         std::cout << "(gr_line (start " << x << " " << y << ") (end " << p2.x()
                   << " " << p2.y() << ") (angle 90) " << layer << " (width "

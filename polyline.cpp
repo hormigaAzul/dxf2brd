@@ -6,11 +6,12 @@
 // at a time. To translate that into something that Kicad understands, a small
 // "stack" is implemented that remembers the last vertex that was read. This
 // way, a line can be drawn from the previous vertex to the current one.
-Polyline::Polyline(unsigned int num_vertices) {
+Polyline::Polyline(unsigned int num_vertices, unsigned int flags) {
     _open = false;
     _num_segments = num_vertices;
-    _first = Vertex(0, 0);
-    _last = Vertex(0, 0);
+    _first = Vertex();
+    _last = Vertex();
+    _flags = flags;
 }
 
 // Store a new point in the "stack". If the polyline is currently marked as
@@ -29,11 +30,14 @@ bool Polyline::addPoint(double x, double y) {
 
 bool Polyline::isOpen() { return _open; }
 
+// Returns true if the polyline is a closed geometry
+bool Polyline::isClosedGeometry(void) const { return _flags & CLOSED_FLAG; }
+
+// Vertex class Methods
+
 Vertex Polyline::getLastVertex(void) const { return _last; }
 
 Vertex Polyline::getInitialVertex(void) const { return _first; }
-
-Vertex::Vertex() : _x(0), _y(0) {}
 
 Vertex::Vertex(double x, double y) : _x(x), _y(y) {}
 
