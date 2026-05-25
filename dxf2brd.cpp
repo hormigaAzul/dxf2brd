@@ -29,7 +29,7 @@
 // to use this program, you must have dxflib installed.
 // then use the command:
 //
-// g++ dxf2brd.cpp -o dxf2brd -ldxflib
+// g++ polyline.cpp dxf2brd.cpp -o dxf2brd -ldxflib
 //
 // To compile the program.
 
@@ -46,6 +46,35 @@
 // After that some editing is needed. Open some_brd_file.kicad_pcb on any text
 // editor, add a ')' at the very end and remove the ')' that is before the
 // generated code.
+void Dxf2BrdFilter::addPolyline(const DL_PolylineData& d) {
+    unsigned int vertices = d.number;
+    // if (currentPolyline.isOpen()) {
+    //    currentPolyline.close();
+    // }
+    // New instances are closed by default, so no need to close it before.
+    currentPolyline = Polyline(vertices);
+}
+void Dxf2BrdFilter::addVertex(const DL_VertexData& d) {
+    double x = 0;
+    double y = 0;
+    Vertex p2;
+
+    convert(d.x, d.y, x, y);
+    if (currentPolyline.isOpen()) {
+        p2 = currentPolyline.getLastVertex();
+        std::cout << "(gr_line (start " << p2.x() << " " << p2.y() << ") (end "
+                  << x << " " << y << ") (angle 90) " << layer << " (width "
+                  << thickness << "))" << std::endl;
+    }
+
+    // Check if this is the last vertex and the trace should be closed
+    if (currentPolyline.addPoint(x, y)) {
+        p2 = currentPolyline.getInitialVertex();
+        std::cout << "(gr_line (start " << x << " " << y << ") (end " << p2.x()
+                  << " " << p2.y() << ") (angle 90) " << layer << " (width "
+                  << thickness << "))" << std::endl;
+    }
+}
 
 // Lines are the easiest to convert: both kicad and dxf use the same
 // format: pairs of points for the start and end.

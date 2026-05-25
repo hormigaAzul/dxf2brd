@@ -121,4 +121,4 @@ python fixer.py --input board_file.kicad_pcb --dxf some_dxf_file.dxf
 
 ## DXF input file format
 
-The input file must be in in millimeters and all closed polygons **MUST** be exploded to lines.
+The input file is expected to be in millimeters. Closed polylines consisting of **only lines** are now supported. Other closed polygons **MUST** be exploded to lines.

@@ -4,6 +4,8 @@
 #include <cmath>
 #include <iostream>
 
+#include "polyline.h"
+
 #ifndef DXF2BRD_H
 #define DXF2BRD_H
 
@@ -24,6 +26,10 @@ class Dxf2BrdFilter : public DL_CreationAdapter {
     virtual void addCircle(const DL_CircleData &d);
     // called when an arc has been detected
     virtual void addArc(const DL_ArcData &d);
+    // called when a polyline beginning has been detected
+    virtual void addPolyline(const DL_PolylineData &d);
+    // called when a vertex addition to a polyline is detected
+    virtual void addVertex(const DL_VertexData &d);
 
    protected:
     // converts a DXF Coordinate, angle and radius into a KICAD
@@ -41,6 +47,7 @@ class Dxf2BrdFilter : public DL_CreationAdapter {
     std::string layer;
     // thickness in mm of drawing in Kicad
     double thickness;
+    Polyline currentPolyline = Polyline(0);
 
    public:
     // constructor
