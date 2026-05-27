@@ -123,6 +123,8 @@ void Dxf2BrdFilter::addArc(const DL_ArcData& d) {
 
     double xstart = 0;
     double ystart = 0;
+    double xmid = 0;
+    double ymid = 0;
     double xend = 0;
     double yend = 0;
 
@@ -135,15 +137,18 @@ void Dxf2BrdFilter::addArc(const DL_ArcData& d) {
         }
     }
     double angle = ka2 - ka1;
-    convert(d.cx, d.cy, xstart, ystart);
-    if (angle < 0) {
+    if (angle >= 0) {
+        convertangle(d.cx, d.cy, d.radius, ka2, xstart, ystart);
         convertangle(d.cx, d.cy, d.radius, ka1, xend, yend);
     } else {
+        convertangle(d.cx, d.cy, d.radius, ka1, xstart, ystart);
         convertangle(d.cx, d.cy, d.radius, ka2, xend, yend);
     }
-    std::cout << "(gr_arc (start " << xstart << " " << ystart << ") (end "
-              << xend << " " << yend << ") (angle " << angle << ") " << layer
-              << " (width " << thickness << "))" << std::endl;
+    convertangle(d.cx, d.cy, d.radius, angle / 2 + d.angle1, xmid, ymid);
+
+    std::cout << "(gr_arc (start " << xstart << " " << ystart << ") (mid "
+              << xmid << " " << ymid << ") (end " << xend << " " << yend << ") "
+              << layer << " (width " << thickness << "))" << std::endl;
 }
 
 // constructor
@@ -160,15 +165,14 @@ void Dxf2BrdFilter::convert(double xin, double yin, double& xout,
 void Dxf2BrdFilter::convertangle(double xin, double yin, double radius,
                                  double angle, double& xout, double& yout) {
     convert(xin, yin, xout, yout);
-    double rad = radius;
 
     /*
     x = r cos(theta)
     y = r sin(theta)
     */
-    xout += rad * (cos(angle * PI / 180.0));
+    xout += radius * (cos(angle * PI / 180.0));
     // Y must be inverted to work with KiCad's drawing logic
-    yout -= rad * (sin(angle * PI / 180.0));
+    yout -= radius * (sin(angle * PI / 180.0));
 }
 
 int main(int argc, char** argv) {
