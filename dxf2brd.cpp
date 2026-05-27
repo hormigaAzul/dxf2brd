@@ -88,13 +88,10 @@ void Dxf2BrdFilter::addLine(const DL_LineData& d) {
     convert(d.x2, d.y2, x2, y2);
 
     std::cout << "\t(gr_line" << std::endl;
-    std::cout << "\t\t(start " << x1 << " " << y1 << ")" << std::endl;
-    std::cout << "\t\t(end " << x2 << " " << y2 << ")" << std::endl;
-    std::cout << "\t\t(stroke" << std::endl;
-    std::cout << "\t\t\t(width " << thickness << ")" << std::endl;
-    std::cout << "\t\t\t(type default)" << std::endl;
-    std::cout << "\t\t)" << std::endl;
-    std::cout << "\t\t" << layer << std::endl;
+    named_coordinate("start", x1, y1);
+    named_coordinate("end", x2, y2);
+    stroke_info("default");
+    layer_info();
     uuid();
     std::cout << "\t)" << std::endl;
 }
@@ -115,14 +112,11 @@ void Dxf2BrdFilter::addCircle(const DL_CircleData& d) {
     xend = cx + rad;
 
     std::cout << "\t(gr_circle" << std::endl;
-    std::cout << "\t\t(center " << cx << " " << cy << ")" << std::endl;
-    std::cout << "\t\t(end " << xend << " " << yend << ")" << std::endl;
-    std::cout << "\t\t(stroke" << std::endl;
-    std::cout << "\t\t\t(width " << thickness << ")" << std::endl;
-    std::cout << "\t\t\t(type default)" << std::endl;
-    std::cout << "\t\t)" << std::endl;
+    named_coordinate("center", cx, cy);
+    named_coordinate("end", xend, yend);
+    stroke_info("default");
     std::cout << "\t\t(fill no)" << std::endl;
-    std::cout << "\t\t" << layer << std::endl;
+    layer_info();
     uuid();
     std::cout << "\t)" << std::endl;
 }
@@ -162,14 +156,11 @@ void Dxf2BrdFilter::addArc(const DL_ArcData& d) {
     convertangle(d.cx, d.cy, d.radius, angle / 2 + d.angle1, xmid, ymid);
 
     std::cout << "\t(gr_arc" << std::endl;
-    std::cout << "\t\t(start " << xstart << " " << ystart << ")" << std::endl;
-    std::cout << "\t\t(mid " << xmid << " " << ymid << ")" << std::endl;
-    std::cout << "\t\t(end " << xend << " " << yend << ")" << std::endl;
-    std::cout << "\t\t(stroke" << std::endl;
-    std::cout << "\t\t\t(width " << thickness << ")" << std::endl;
-    std::cout << "\t\t\t(type solid)" << std::endl;
-    std::cout << "\t\t)" << std::endl;
-    std::cout << "\t\t" << layer << std::endl;
+    named_coordinate("start", xstart, ystart);
+    named_coordinate("mid", xmid, ymid);
+    named_coordinate("end", xend, yend);
+    stroke_info("solid");
+    layer_info();
     uuid();
     std::cout << "\t)" << std::endl;
 }
@@ -196,6 +187,20 @@ void Dxf2BrdFilter::convertangle(double xin, double yin, double radius,
     xout += radius * (cos(angle * M_PI / 180.0));
     // Y must be inverted to work with KiCad's drawing logic
     yout -= radius * (sin(angle * M_PI / 180.0));
+}
+
+void Dxf2BrdFilter::named_coordinate(std::string text, double x, double y) {
+    std::cout << "\t\t(" << text << " " << x << " " << y << ")" << std::endl;
+}
+
+void Dxf2BrdFilter::stroke_info(std::string type) {
+    std::cout << "\t\t(stroke" << std::endl;
+    std::cout << "\t\t\t(width " << thickness << ")" << std::endl;
+    std::cout << "\t\t\t(type " << type << ")" << std::endl;
+    std::cout << "\t\t)" << std::endl;
+}
+void Dxf2BrdFilter::layer_info(void) {
+    std::cout << "\t\t" << layer << std::endl;
 }
 
 // Generate a random 128 bits UUID concatenating two random numbers genertaes
