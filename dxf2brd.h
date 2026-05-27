@@ -2,7 +2,9 @@
 #include <dxflib/dl_dxf.h>
 
 #include <cmath>
+#include <iomanip>
 #include <iostream>
+#include <random>
 
 #include "polyline.h"
 
@@ -39,6 +41,8 @@ class Dxf2BrdFilter : public DL_CreationAdapter {
                       double &xout, double &yout);
     // converts a DXF coordinate to a KICAD coordinate
     void convert(double xin, double yin, double &xout, double &yout);
+    // generate a random 128 bits UUID
+    inline void uuid(void);
     // offset (in mm) to insert origin of DXF
     // drawing in KICAD drawing.
     int xoffset;

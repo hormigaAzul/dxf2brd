@@ -95,6 +95,7 @@ void Dxf2BrdFilter::addLine(const DL_LineData& d) {
     std::cout << "\t\t\t(type default)" << std::endl;
     std::cout << "\t\t)" << std::endl;
     std::cout << "\t\t" << layer << std::endl;
+    uuid();
     std::cout << "\t)" << std::endl;
 }
 
@@ -122,6 +123,7 @@ void Dxf2BrdFilter::addCircle(const DL_CircleData& d) {
     std::cout << "\t\t)" << std::endl;
     std::cout << "\t\t(fill no)" << std::endl;
     std::cout << "\t\t" << layer << std::endl;
+    uuid();
     std::cout << "\t)" << std::endl;
 }
 
@@ -168,6 +170,7 @@ void Dxf2BrdFilter::addArc(const DL_ArcData& d) {
     std::cout << "\t\t\t(type solid)" << std::endl;
     std::cout << "\t\t)" << std::endl;
     std::cout << "\t\t" << layer << std::endl;
+    uuid();
     std::cout << "\t)" << std::endl;
 }
 
@@ -193,6 +196,35 @@ void Dxf2BrdFilter::convertangle(double xin, double yin, double radius,
     xout += radius * (cos(angle * PI / 180.0));
     // Y must be inverted to work with KiCad's drawing logic
     yout -= radius * (sin(angle * PI / 180.0));
+}
+
+// Generate a random 128 bits UUID concatenating two random numbers genertaes
+// using the ms19937 Mersene Twister algorithm
+void Dxf2BrdFilter::uuid(void) {
+    std::random_device rd;
+    std::mt19937_64 generator(rd());
+    std::uniform_int_distribution<uint64_t> dist;
+    uint64_t lower = dist(generator);
+    uint64_t higher = dist(generator);
+
+    uint8_t bytes[16];
+
+    for (uint8_t i = 0; i < 8; ++i) {
+        bytes[i] = (lower >> (56 - 8 * i)) & 0xff;
+        bytes[i + 8] = (higher >> (56 - 8 * i)) & 0xff;
+    }
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+    std::cout << "\t\t(uuid \"";
+    std::cout << std::hex << std::setfill('0');
+    for (uint8_t i = 0; i < 16; ++i) {
+        std::cout << std::setw(2) << static_cast<int>(bytes[i]);
+        if (i == 3 || i == 5 || i == 7 || i == 9) {
+            std::cout << "-";
+        }
+    }
+    std::cout << std::dec << "\")" << std::endl;
 }
 
 int main(int argc, char** argv) {
