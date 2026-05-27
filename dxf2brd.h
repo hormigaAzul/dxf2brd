@@ -13,7 +13,7 @@
 #define LINE_THICKNESS 0.15  // thickness of traces
 #define X_OFFSET 13          // x offset of DXF origin in kicad coordinate space
 #define Y_OFFSET 198         // y offset of DXF origin in kicad coordinate space
-#define LAYER "(layer Edge.Cuts)"  // layer to render output on
+#define LAYER "(layer \"Edge.Cuts\")"  // layer to render output on
 
 #define PI 3.14159265
 

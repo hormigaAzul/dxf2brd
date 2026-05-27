@@ -87,9 +87,15 @@ void Dxf2BrdFilter::addLine(const DL_LineData& d) {
     convert(d.x1, d.y1, x1, y1);
     convert(d.x2, d.y2, x2, y2);
 
-    std::cout << "(gr_line (start " << x1 << " " << y1 << ") (end " << x2 << " "
-              << y2 << ") (angle 90) " << layer << " (width " << thickness
-              << "))" << std::endl;
+    std::cout << "\t(gr_line" << std::endl;
+    std::cout << "\t\t(start " << x1 << " " << y1 << ")" << std::endl;
+    std::cout << "\t\t(end " << x2 << " " << y2 << ")" << std::endl;
+    std::cout << "\t\t(stroke" << std::endl;
+    std::cout << "\t\t\t(width " << thickness << ")" << std::endl;
+    std::cout << "\t\t\t(type default)" << std::endl;
+    std::cout << "\t\t)" << std::endl;
+    std::cout << "\t\t" << layer << std::endl;
+    std::cout << "\t)" << std::endl;
 }
 
 // Circles are a bit more complex. Kicad uses two points: one at the
@@ -107,9 +113,16 @@ void Dxf2BrdFilter::addCircle(const DL_CircleData& d) {
     yend = cy;
     xend = cx + rad;
 
-    std::cout << "(gr_circle (center " << cx << " " << cy << ") (end " << xend
-              << " " << yend << ") " << layer << " (width " << thickness << "))"
-              << std::endl;
+    std::cout << "\t(gr_circle" << std::endl;
+    std::cout << "\t\t(center " << cx << " " << cy << ")" << std::endl;
+    std::cout << "\t\t(end " << xend << " " << yend << ")" << std::endl;
+    std::cout << "\t\t(stroke" << std::endl;
+    std::cout << "\t\t\t(width " << thickness << ")" << std::endl;
+    std::cout << "\t\t\t(type default)" << std::endl;
+    std::cout << "\t\t)" << std::endl;
+    std::cout << "\t\t(fill no)" << std::endl;
+    std::cout << "\t\t" << layer << std::endl;
+    std::cout << "\t)" << std::endl;
 }
 
 // Kicad uses two points to describe an arc: the first point is
@@ -146,9 +159,16 @@ void Dxf2BrdFilter::addArc(const DL_ArcData& d) {
     }
     convertangle(d.cx, d.cy, d.radius, angle / 2 + d.angle1, xmid, ymid);
 
-    std::cout << "(gr_arc (start " << xstart << " " << ystart << ") (mid "
-              << xmid << " " << ymid << ") (end " << xend << " " << yend << ") "
-              << layer << " (width " << thickness << "))" << std::endl;
+    std::cout << "\t(gr_arc" << std::endl;
+    std::cout << "\t\t(start " << xstart << " " << ystart << ")" << std::endl;
+    std::cout << "\t\t(mid " << xmid << " " << ymid << ")" << std::endl;
+    std::cout << "\t\t(end " << xend << " " << yend << ")" << std::endl;
+    std::cout << "\t\t(stroke" << std::endl;
+    std::cout << "\t\t\t(width " << thickness << ")" << std::endl;
+    std::cout << "\t\t\t(type solid)" << std::endl;
+    std::cout << "\t\t)" << std::endl;
+    std::cout << "\t\t" << layer << std::endl;
+    std::cout << "\t)" << std::endl;
 }
 
 // constructor
