@@ -87,13 +87,7 @@ void Dxf2BrdFilter::addLine(const DL_LineData& d) {
     convert(d.x1, d.y1, x1, y1);
     convert(d.x2, d.y2, x2, y2);
 
-    std::cout << "\t(gr_line" << std::endl;
-    named_coordinate("start", x1, y1);
-    named_coordinate("end", x2, y2);
-    stroke_info("default");
-    layer_info();
-    uuid();
-    std::cout << "\t)" << std::endl;
+    line_block(x1, y1, x2, y2);
 }
 
 // Circles are a bit more complex. Kicad uses two points: one at the
@@ -187,6 +181,16 @@ void Dxf2BrdFilter::convertangle(double xin, double yin, double radius,
     xout += radius * (cos(angle * M_PI / 180.0));
     // Y must be inverted to work with KiCad's drawing logic
     yout -= radius * (sin(angle * M_PI / 180.0));
+}
+
+void Dxf2BrdFilter::line_block(double x1, double y1, double x2, double y2) {
+    std::cout << "\t(gr_line" << std::endl;
+    named_coordinate("start", x1, y1);
+    named_coordinate("end", x2, y2);
+    stroke_info("default");
+    layer_info();
+    uuid();
+    std::cout << "\t)" << std::endl;
 }
 
 void Dxf2BrdFilter::named_coordinate(std::string text, double x, double y) {

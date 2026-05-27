@@ -33,13 +33,13 @@ bool Polyline::isOpen() { return _open; }
 // Returns true if the polyline is a closed geometry
 bool Polyline::isClosedGeometry(void) const { return _flags & CLOSED_FLAG; }
 
-// Vertex class Methods
-
 Vertex Polyline::getLastVertex(void) const { return _last; }
 
 Vertex Polyline::getInitialVertex(void) const { return _first; }
 
 Vertex::Vertex(double x, double y) : _x(x), _y(y) {}
+
+// Vertex class Methods
 
 double Vertex::x(void) const { return _x; }
 

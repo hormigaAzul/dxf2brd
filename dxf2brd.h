@@ -41,6 +41,8 @@ class Dxf2BrdFilter : public DL_CreationAdapter {
     void convert(double xin, double yin, double &xout, double &yout);
     // generate a random 128 bits UUID
     inline void uuid(void);
+    // output a complete line block
+    inline void line_block(double x1, double y1, double x2, double y2);
     // output a named coordinate
     inline void named_coordinate(std::string text, double x, double y);
     // output the stroke definition block
