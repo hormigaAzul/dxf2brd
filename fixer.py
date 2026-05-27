@@ -12,32 +12,25 @@ parser.add_argument('-d', '--dxf', dest='fileDxf',
 args = parser.parse_args()
 
 
-def analyze(line):
-    count = 0
-    for c in line:
-        if c == '(':
-            count = count + 1
-        elif c == ')':
-            count = count - 1
-    return count
-
-
 def fix(arch):
-    f = open(arch)
+    f = open(arch, encoding='utf-8')
     lines = f.readlines()
     f.close()
 
-    f = open(arch, 'w')
-    unclosed = 0
+    f = open(arch,  mode='w', encoding='utf-8')
+    line_buffer = None
+    skip_line = False
     for l in lines:
-        ans = analyze(l)
-        if (ans == 0):
-            f.write(l)
+        if "(embedded_fonts" in l and line_buffer is None:
+            line_buffer = l
+            skip_line = True
         else:
-            unclosed = unclosed + ans
-            if unclosed != 0:
+            if not skip_line:
                 f.write(l)
-    f.write(')\n\n')
+            else:
+                skip_line = False
+    f.write(line_buffer)
+    f.write(')\n')
     f.close()
 
 
@@ -51,4 +44,4 @@ if args.fileFix is not None:
 elif (args.fileIn is not None and args.fileDxf is not None):
     generate(args.fileIn, args.fileDxf)
 else:
-    sub.call(["python fixer.py -h"], shell=True)
+    sub.call(["python3 fixer.py -h"], shell=True)

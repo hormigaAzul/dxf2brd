@@ -17,8 +17,6 @@
 #define Y_OFFSET 198         // y offset of DXF origin in kicad coordinate space
 #define LAYER "(layer \"Edge.Cuts\")"  // layer to render output on
 
-#define PI 3.14159265
-
 // This class contains the callbacks from dxflib only 3 important ones
 // matter: the callbacks for lines, circles, and arcs.
 class Dxf2BrdFilter : public DL_CreationAdapter {

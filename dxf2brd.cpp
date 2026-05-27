@@ -193,9 +193,9 @@ void Dxf2BrdFilter::convertangle(double xin, double yin, double radius,
     x = r cos(theta)
     y = r sin(theta)
     */
-    xout += radius * (cos(angle * PI / 180.0));
+    xout += radius * (cos(angle * M_PI / 180.0));
     // Y must be inverted to work with KiCad's drawing logic
-    yout -= radius * (sin(angle * PI / 180.0));
+    yout -= radius * (sin(angle * M_PI / 180.0));
 }
 
 // Generate a random 128 bits UUID concatenating two random numbers genertaes
