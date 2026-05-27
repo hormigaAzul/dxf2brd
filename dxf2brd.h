@@ -45,10 +45,14 @@ class Dxf2BrdFilter : public DL_CreationAdapter {
     inline void line_block(double x1, double y1, double x2, double y2);
     // output a named coordinate
     inline void named_coordinate(std::string text, double x, double y);
+    // output a generic xy coordinate
+    inline void xy_coordinate(double x, double y);
     // output the stroke definition block
     inline void stroke_info(std::string type);
     // output the layer data block
     inline void layer_info(void);
+    // output a (no fill) block
+    inline void no_fill(void);
     // offset (in mm) to insert origin of DXF
     // drawing in KICAD drawing.
     int xoffset;

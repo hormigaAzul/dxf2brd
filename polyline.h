@@ -16,7 +16,6 @@ class Polyline {
     unsigned int _flags;
     unsigned int _num_segments;
     Vertex _last = Vertex();
-    Vertex _first = Vertex();
 
    public:
     // Constructor
@@ -29,6 +28,4 @@ class Polyline {
     bool isClosedGeometry(void) const;
     // Get the last vertex stored
     Vertex getLastVertex(void) const;
-    // Get the initial Vertex of a polyline
-    Vertex getInitialVertex(void) const;
 };

@@ -9,19 +9,17 @@
 Polyline::Polyline(unsigned int num_vertices, unsigned int flags) {
     _open = false;
     _num_segments = num_vertices;
-    _first = Vertex();
     _last = Vertex();
     _flags = flags;
 }
 
 // Store a new point in the "stack". If the polyline is currently marked as
-// closed, mark it as open and also store the point data as the first vertex.
+// closed, mark it as open.
 // Return true if the received vertex should be the last one of the polyline.
 bool Polyline::addPoint(double x, double y) {
     if (!_open) {
         // This transition indicates this is the first vertex
         _open = true;
-        _first = Vertex(x, y);
     }
     _last = Vertex(x, y);
     _num_segments--;
@@ -34,8 +32,6 @@ bool Polyline::isOpen() { return _open; }
 bool Polyline::isClosedGeometry(void) const { return _flags & CLOSED_FLAG; }
 
 Vertex Polyline::getLastVertex(void) const { return _last; }
-
-Vertex Polyline::getInitialVertex(void) const { return _first; }
 
 Vertex::Vertex(double x, double y) : _x(x), _y(y) {}
 

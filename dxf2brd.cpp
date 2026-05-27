@@ -47,10 +47,6 @@
 // editor, add a ')' at the very end and remove the ')' that is before the
 // generated code.
 void Dxf2BrdFilter::addPolyline(const DL_PolylineData& d) {
-    // if (currentPolyline.isOpen()) {
-    //    currentPolyline.close();
-    // }
-    // New instances are closed by default, so no need to close it before.
     currentPolyline = Polyline(d.number, d.flags);
 }
 
@@ -59,20 +55,34 @@ void Dxf2BrdFilter::addVertex(const DL_VertexData& d) {
     double y = 0;
     Vertex p2;
 
+    // Adjust the point reference before using/storing it
     convert(d.x, d.y, x, y);
-    if (currentPolyline.isOpen()) {
-        p2 = currentPolyline.getLastVertex();
-        std::cout << "(gr_line (start " << p2.x() << " " << p2.y() << ") (end "
-                  << x << " " << y << ") (angle 90) " << layer << " (width "
-                  << thickness << "))" << std::endl;
-    }
+    if (currentPolyline.isClosedGeometry()) {
+        // First point
+        if (!currentPolyline.isOpen()) {
+            std::cout << "\t(gr_poly" << std::endl;
+            std::cout << "\t\t(pts" << std::endl << "\t\t\t";
+        }
+        xy_coordinate(x, y);
+        // Last point
+        if (currentPolyline.addPoint(x, y)) {
+            // Close the pts block
+            std::cout << std::endl << "\t\t)" << std::endl;
+            stroke_info("solid");
+            no_fill();
+            layer_info();
+            uuid();
+            std::cout << "\t)" << std::endl;
+        }
 
-    // Check if this is the last vertex and the trace should be closed
-    if (currentPolyline.addPoint(x, y) && currentPolyline.isClosedGeometry()) {
-        p2 = currentPolyline.getInitialVertex();
-        std::cout << "(gr_line (start " << x << " " << y << ") (end " << p2.x()
-                  << " " << p2.y() << ") (angle 90) " << layer << " (width "
-                  << thickness << "))" << std::endl;
+    } else {
+        if (currentPolyline.isOpen()) {
+            // The point in the vertex was adjusted before storing.
+            // No need to adjust.
+            p2 = currentPolyline.getLastVertex();
+            line_block(p2.x(), p2.y(), x, y);
+        }
+        currentPolyline.addPoint(x, y);
     }
 }
 
@@ -109,7 +119,7 @@ void Dxf2BrdFilter::addCircle(const DL_CircleData& d) {
     named_coordinate("center", cx, cy);
     named_coordinate("end", xend, yend);
     stroke_info("default");
-    std::cout << "\t\t(fill no)" << std::endl;
+    no_fill();
     layer_info();
     uuid();
     std::cout << "\t)" << std::endl;
@@ -197,6 +207,10 @@ void Dxf2BrdFilter::named_coordinate(std::string text, double x, double y) {
     std::cout << "\t\t(" << text << " " << x << " " << y << ")" << std::endl;
 }
 
+void Dxf2BrdFilter::xy_coordinate(double x, double y) {
+    std::cout << "(xy " << x << " " << y << ") ";
+}
+
 void Dxf2BrdFilter::stroke_info(std::string type) {
     std::cout << "\t\t(stroke" << std::endl;
     std::cout << "\t\t\t(width " << thickness << ")" << std::endl;
@@ -206,6 +220,8 @@ void Dxf2BrdFilter::stroke_info(std::string type) {
 void Dxf2BrdFilter::layer_info(void) {
     std::cout << "\t\t" << layer << std::endl;
 }
+
+void Dxf2BrdFilter::no_fill(void) { std::cout << "\t\t(fill no)" << std::endl; }
 
 // Generate a random 128 bits UUID concatenating two random numbers genertaes
 // using the ms19937 Mersene Twister algorithm
