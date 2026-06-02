@@ -46,6 +46,7 @@
 // After that some editing is needed. Open some_brd_file.kicad_pcb on any text
 // editor, add a ')' at the very end and remove the ')' that is before the
 // generated code.
+
 void Dxf2BrdFilter::addPolyline(const DL_PolylineData& d) {
     currentPolyline = Polyline(d.number, d.flags);
 }
@@ -53,19 +54,22 @@ void Dxf2BrdFilter::addPolyline(const DL_PolylineData& d) {
 void Dxf2BrdFilter::addVertex(const DL_VertexData& d) {
     double x = 0;
     double y = 0;
-    Vertex p2;
 
     // Adjust the point reference before using/storing it
     convert(d.x, d.y, x, y);
-    if (currentPolyline.isClosedGeometry()) {
-        // First point
-        if (!currentPolyline.isOpen()) {
+
+    if (currentPolyline.addPoint(x, y, d.bulge)) {
+        Vertex p2;
+        // Closed geometry of only straight lines
+        if (!currentPolyline.hasCurves() &&
+            currentPolyline.isClosedGeometry()) {
             std::cout << "\t(gr_poly" << std::endl;
             std::cout << "\t\t(pts" << std::endl << "\t\t\t";
-        }
-        xy_coordinate(x, y);
-        // Last point
-        if (currentPolyline.addPoint(x, y)) {
+            for (int n_segments = currentPolyline.size(); n_segments > 0;
+                 --n_segments) {
+                p2 = currentPolyline.popFirst();
+                xy_coordinate(p2.x(), p2.y());
+            }
             // Close the pts block
             std::cout << std::endl << "\t\t)" << std::endl;
             stroke_info("solid");
@@ -73,16 +77,32 @@ void Dxf2BrdFilter::addVertex(const DL_VertexData& d) {
             layer_info();
             uuid();
             std::cout << "\t)" << std::endl;
+        } else {
+            Vertex p1 = currentPolyline.popFirst();
+            // Store first point for closing the geometry if necessary
+            Vertex p0 = p1;
+            for (int n_segments = currentPolyline.size() - 1; n_segments > 0;
+                 --n_segments) {
+                p2 = currentPolyline.popFirst();
+                if (p1.bulge() > 0) {
+                    arc_block_from_bulge(p2, p1, p1.bulge());
+                } else if (p1.bulge() < 0) {
+                    arc_block_from_bulge(p1, p2, -p1.bulge());
+                } else {
+                    line_block(p1.x(), p1.y(), p2.x(), p2.y());
+                }
+                p1 = p2;
+            }
+            if (currentPolyline.isClosedGeometry()) {
+                if (p1.bulge() > 0) {
+                    arc_block_from_bulge(p0, p1, p1.bulge());
+                } else if (p1.bulge() < 0) {
+                    arc_block_from_bulge(p1, p0, -p1.bulge());
+                } else {
+                    line_block(p1.x(), p1.y(), p0.x(), p0.y());
+                }
+            }
         }
-
-    } else {
-        if (currentPolyline.isOpen()) {
-            // The point in the vertex was adjusted before storing.
-            // No need to adjust.
-            p2 = currentPolyline.getLastVertex();
-            line_block(p2.x(), p2.y(), x, y);
-        }
-        currentPolyline.addPoint(x, y);
     }
 }
 
@@ -109,7 +129,6 @@ void Dxf2BrdFilter::addCircle(const DL_CircleData& d) {
     double cy = 0;
     double xend, yend;
     double rad = d.radius;
-    double crad = rad + 150;
 
     convert(d.cx, d.cy, cx, cy);
     yend = cy;
@@ -206,6 +225,45 @@ void Dxf2BrdFilter::arc_block(double xstart, double ystart, double xmid,
     layer_info();
     uuid();
     std::cout << "\t)" << std::endl;
+}
+
+void Dxf2BrdFilter::arc_block_from_bulge(Vertex p1, Vertex p2, double bulge) {
+    // Half of the angle between the two vertices indicated by the bulge.
+    // According to DXF specs, bulge equals the tangent of one fourth of the
+    // angle for the arc segment.
+    // So the angle (in radians) between P1 and P2 is 4*atan(bulge)
+    double half_angle = 2 * atan(bulge);
+    // Absolute value of the half angle
+    double magnitude = abs(half_angle);
+    // Chord length between the two vertices
+    double c = sqrt(pow(p1.x() - p2.x(), 2) + pow(p1.y() - p2.y(), 2));
+    // Arc radius
+    double r = c / (2 * sin(half_angle));
+    // Mid-point (M) between the two vertices
+    double xmid = (p1.x() + p2.x()) / 2;
+    double ymid = (p1.y() + p2.y()) / 2;
+    // Distance between M and the arc center
+    double d = r * cos(half_angle);
+    // Perpendicular unit vector
+    const double nx = (p2.y() - p1.y()) / (-c);
+    const double ny = (p2.x() - p1.x()) / c;
+
+    // Compute the arc center coordinates (C)
+    xmid += d * nx;
+    ymid += d * ny;
+
+    // Radius vector from C to P1
+    const double rx = p1.x() - xmid;
+    const double ry = p1.y() - ymid;
+    // Compute the coordinates of the middle point on the arc chord
+    // P = C + R(phi)r
+    // where phi is half the angle between P1 and P2 and
+    // R(phi) is the rotation matrix
+    // | cos(phi)    -sin(phi) |
+    // | sin(phi)    cos(phi)  |
+    xmid += (rx * cos(magnitude)) - (ry * sin(magnitude));
+    ymid += (rx * sin(magnitude)) + (ry * cos(magnitude));
+    arc_block(p1.x(), p1.y(), xmid, ymid, p2.x(), p2.y());
 }
 
 void Dxf2BrdFilter::named_coordinate(std::string text, double x, double y) {

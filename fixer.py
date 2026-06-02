@@ -18,18 +18,18 @@ def fix(arch):
     f.close()
 
     f = open(arch,  mode='w', encoding='utf-8')
-    line_buffer = None
+    embedded_fonts_line = None
     skip_line = False
     for l in lines:
-        if "(embedded_fonts" in l and line_buffer is None:
-            line_buffer = l
+        if "(embedded_fonts" in l and embedded_fonts_line is None:
+            embedded_fonts_line = l
             skip_line = True
         else:
             if not skip_line:
                 f.write(l)
             else:
                 skip_line = False
-    f.write(line_buffer)
+    f.write(embedded_fonts_line)
     f.write(')\n')
     f.close()
 

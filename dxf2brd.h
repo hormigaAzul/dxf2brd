@@ -46,6 +46,9 @@ class Dxf2BrdFilter : public DL_CreationAdapter {
     // output a complete arc block to std output
     inline void arc_block(double xstart, double ystart, double xmid,
                           double ymid, double xend, double yend);
+    // output a complete arc block to std output from two vertices and the bulge
+    // between them
+    inline void arc_block_from_bulge(Vertex p1, Vertex p2, double bulge);
     // output a named coordinate
     inline void named_coordinate(std::string text, double x, double y);
     // output a generic xy coordinate

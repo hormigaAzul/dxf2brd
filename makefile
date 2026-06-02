@@ -1,9 +1,10 @@
 COMPILER = g++
-FLAGS = -O3 -ldxflib
+FLAGS = -Wall -O3 -ldxflib
 EXECUTABLE = dxf2brd
+SRC = dxf2brd.cpp polyline.cpp
 
-$(EXECUTABLE): dxf2brd.cpp
-	$(COMPILER) polyline.cpp dxf2brd.cpp $(FLAGS) -o $(EXECUTABLE)
+$(EXECUTABLE): $(SRC)
+	$(COMPILER) $(SRC) $(FLAGS) -o $(EXECUTABLE)
 	
 .PHONY : clean
 clean :
