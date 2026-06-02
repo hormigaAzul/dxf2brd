@@ -41,8 +41,11 @@ class Dxf2BrdFilter : public DL_CreationAdapter {
     void convert(double xin, double yin, double &xout, double &yout);
     // generate a random 128 bits UUID
     inline void uuid(void);
-    // output a complete line block
+    // output a complete line block to std output
     inline void line_block(double x1, double y1, double x2, double y2);
+    // output a complete arc block to std output
+    inline void arc_block(double xstart, double ystart, double xmid,
+                          double ymid, double xend, double yend);
     // output a named coordinate
     inline void named_coordinate(std::string text, double x, double y);
     // output a generic xy coordinate

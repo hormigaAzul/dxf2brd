@@ -125,10 +125,10 @@ void Dxf2BrdFilter::addCircle(const DL_CircleData& d) {
     std::cout << "\t)" << std::endl;
 }
 
-// Kicad uses two points to describe an arc: the first point is
-// located at the center of the arc. The second point is located at
-// one terminus of the arc. The other terminus is automatically
-// defined by moving -N degrees from the start point.
+// Kicad uses three points to describe an arc: the first point is
+// located at the beginning of the arc. The third point is located at the end of
+// the arc. The second point is located at any point of the arc between the
+// start and end. The second point determines the rotation direction.
 
 void Dxf2BrdFilter::addArc(const DL_ArcData& d) {
     double ka1 = d.angle1;
@@ -159,14 +159,7 @@ void Dxf2BrdFilter::addArc(const DL_ArcData& d) {
     }
     convertangle(d.cx, d.cy, d.radius, angle / 2 + d.angle1, xmid, ymid);
 
-    std::cout << "\t(gr_arc" << std::endl;
-    named_coordinate("start", xstart, ystart);
-    named_coordinate("mid", xmid, ymid);
-    named_coordinate("end", xend, yend);
-    stroke_info("solid");
-    layer_info();
-    uuid();
-    std::cout << "\t)" << std::endl;
+    arc_block(xstart, ystart, xmid, ymid, xend, yend);
 }
 
 // constructor
@@ -198,6 +191,18 @@ void Dxf2BrdFilter::line_block(double x1, double y1, double x2, double y2) {
     named_coordinate("start", x1, y1);
     named_coordinate("end", x2, y2);
     stroke_info("default");
+    layer_info();
+    uuid();
+    std::cout << "\t)" << std::endl;
+}
+
+void Dxf2BrdFilter::arc_block(double xstart, double ystart, double xmid,
+                              double ymid, double xend, double yend) {
+    std::cout << "\t(gr_arc" << std::endl;
+    named_coordinate("start", xstart, ystart);
+    named_coordinate("mid", xmid, ymid);
+    named_coordinate("end", xend, yend);
+    stroke_info("solid");
     layer_info();
     uuid();
     std::cout << "\t)" << std::endl;
